@@ -1,0 +1,143 @@
+##problem 1##
+The beginning line: sqlite3 reuters.db
+(a). 
+SELECT count(*) FROM(
+SELECT*
+FROM frequency
+WHERE docid="10398_txt_earn")x;
+
+##138
+
+
+(b). 
+SELECT count(*) FROM(
+SELECT term
+FROM frequency
+WHERE docid="10398_txt_earn" AND count=1
+)x;
+
+##110
+
+(c).
+SELECT count(*) FROM(
+SELECT term
+FROM frequency
+WHERE docid="10398_txt_earn" AND count=1
+UNION
+SELECT term 
+FROM frequency
+WHERE docid="925_txt_trade" AND count=1
+
+)x;
+
+###324
+
+(d).
+SELECT count(*) FROM(
+SELECT DISTINCT docid
+FROM frequency
+WHERE term="law" or term="legal"
+)x;
+
+##58
+
+(e).
+SELECT count(*) FROM(
+SELECT  docid, count(distinct term) as term_count FROM frequency
+GROUP BY docid
+HAVING term_count>300)x;
+
+##11
+## this is to count distinct term in a file.
+##You're actually supposed to find documents with more than 300 different terms
+
+(f). 
+ SElECT count(*) FROM(
+ (SELECT docid FROM frequency
+ WHERE term='transactions')A
+ INNER JOIN
+ (SELECT docid FROM frequency
+ WHERE term='world')B
+ ON (A.docid=B.docid)
+ )x;
+
+##3
+###inner join is the intersection
+
+(f').
+ select count(*) from (
+ select docid from Frequency where term= 'transactions' 
+ INTERSECT 
+ select docid from Frequency where term= 'world');
+
+
+
+
+(g). sqlite3 matrix.db
+SELECT a.row_num, b.col_num, sum(a.value*b.value) from a,b
+WHERE a.col_num=b.row_num
+GROUP BY a.row_num, b.col_num;
+
+##2|3|2874
+
+(h). SELECT a.docid, b.docid, sum(a.count*b.count) 
+     FROM Frequency a, Frequency b
+     ON a.term=b.term
+     WHERE a.docid='10080_txt_crude' AND b.docid='17035_txt_earn'
+     GROUP BY a.docid, b.docid;
+
+ ###10080_txt_crude|17035_txt_earn|19
+
+(i). 
+CREATE VIEW if not exists view_1 AS
+SELECT * FROM frequency
+UNION
+SELECT 'q' as docid, 'washington' as term, 1 as count 
+UNION
+SELECT 'q' as docid, 'taxes' as term, 1 as count
+UNION 
+SELECT 'q' as docid, 'treasury' as term, 1 as count;
+
+
+
+SELECT A.docid, B.docid, sum(A.count*B.count) as similarity
+FROM view_1 A, view_1 B on A.term=B.term
+WHERE A.docid='q' AND B.docid!='q'
+GROUP BY A.docid, B.docid
+ORDER BY similarity DESC LIMIT 10;
+
+
+###
+q|16094_txt_trade|6
+q|16357_txt_trade|6
+q|19775_txt_interest|6
+q|10623_txt_trade|5
+q|5964_txt_trade|5
+q|12774_txt_interest|4
+q|12848_txt_trade|4
+q|16214_txt_interest|4
+q|16681_txt_interest|4
+q|1711_txt_crude|4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
